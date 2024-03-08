@@ -7,7 +7,6 @@ const sepoliaProvider = new ethers.InfuraWebSocketProvider("sepolia", "070c174a2
 const walletPrivateKey = '3e4bd3d08cb2be37cf995e177ba2c436ec75d6b2a68fde73a800cc306bc7cafa';
 const wallet = new ethers.Wallet(walletPrivateKey, sepoliaProvider);
 
-// const sepoliaContractAddress = '0x8e36A56dB311222927b3aa8BEB5C3c8861320FEE';
 const sepoliaContract = new ethers.Contract(sepoliaContractAddress, CONTRACT_ABI, wallet);
 
 const nonce = await sepoliaProvider.getTransactionCount("0x6d81571895F2783715C23a64D53E807a581f750D");
@@ -17,8 +16,6 @@ let startBlock = readLastState().lastBlock;
 
 const maxRetries = 100;
 const baseDelay = 1000;
-
-
 
 function readLastState() {
     const filePath = path.join("./", 'lastState.json');
@@ -35,13 +32,10 @@ function updateLastState(blockNumber, nonce) {
     fs.writeFileSync(filePath, data, 'utf8');
 }
 
-
 async function startEventListener() {
-
     let retries = 0;
 
     while (retries <= maxRetries) {
-
         try {
                 sepoliaContract.on('Ping', async (event) => {
                 console.log(`Ping event from block: ${event.log.blockNumber}`);
@@ -61,15 +55,12 @@ async function startEventListener() {
         }
 
     }
-
     if (retries > maxRetries) {
         console.error(`Failed to initialize event listener after ${maxRetries} retries.`);
     }
 }
 
-
 async function sendPong(pingHash, blockNumber) {
-
     let retries = 0;
 
     if (blockNumber <= startBlock) {
@@ -81,6 +72,7 @@ async function sendPong(pingHash, blockNumber) {
     while (retries <= maxRetries) {
         try {
             const nonce = await sepoliaProvider.getTransactionCount("0x6d81571895F2783715C23a64D53E807a581f750D");
+            // const newNonce = nonce + 1;
             const gasPrice = await sepoliaProvider.getFeeData();
             const tx = await sepoliaContract.pong(pingHash, { gasPrice: gasPrice.maxFeePerGas, nonce: nonce});
             console.log(`Sent Pong transaction with Pong txHash: ${tx.hash}`, `Ping txHash ${pingHash}`, `PingBlock: ${startBlock}`);
@@ -97,17 +89,6 @@ async function sendPong(pingHash, blockNumber) {
             }
         }
     }
-
-    // try {
-        // const nonce = await sepoliaProvider.getTransactionCount("0x7A009cF93A68533bf15347a9C6637C229c6d25BA");
-        // const gasPrice = await sepoliaProvider.getFeeData();
-        // const tx = await sepoliaContract.pong(pingHash, { gasPrice: gasPrice.maxFeePerGas, nonce: nonce});
-        // console.log(`Sent Pong transaction with Pong txHash: ${tx.hash}`, `Ping txHash ${pingHash}`, `PingBlock: ${startBlock}`);
-        // updateLastState(blockNumber, nonce);
-        // console.log(tx);
-    // } catch (error) {
-    //     console.error(`Failed to send Pong for block ${blockNumber}: ${error.message}`);
-    // }
     console.log(startBlock);
 }
 
