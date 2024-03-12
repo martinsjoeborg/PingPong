@@ -4,12 +4,12 @@ import fs from 'fs';
 import path from 'path';
 
 const sepoliaProvider = new ethers.InfuraWebSocketProvider("sepolia", "070c174a2442432a803e427d142d79c1");
-const walletPrivateKey = '3e4bd3d08cb2be37cf995e177ba2c436ec75d6b2a68fde73a800cc306bc7cafa';
+const walletPrivateKey = '2a32f63779c8684b17ea60d0d5979afef3741b8de323e96ac9596458f18bd26f';
 const wallet = new ethers.Wallet(walletPrivateKey, sepoliaProvider);
 
 const sepoliaContract = new ethers.Contract(sepoliaContractAddress, CONTRACT_ABI, wallet);
 
-const nonce = await sepoliaProvider.getTransactionCount("0x6d81571895F2783715C23a64D53E807a581f750D");
+const nonce = await sepoliaProvider.getTransactionCount("0x5630Ab31526601e11d663cd623e202CaBB5B3f2f");
 console.log(nonce);
 
 let startBlock = readLastState().lastBlock;
@@ -71,13 +71,14 @@ async function sendPong(pingHash, blockNumber) {
 
     while (retries <= maxRetries) {
         try {
-            const nonce = await sepoliaProvider.getTransactionCount("0x6d81571895F2783715C23a64D53E807a581f750D");
+            const nonce = await sepoliaProvider.getTransactionCount("0x5630Ab31526601e11d663cd623e202CaBB5B3f2f");
             // const newNonce = nonce + 1;
             const gasPrice = await sepoliaProvider.getFeeData();
             const tx = await sepoliaContract.pong(pingHash, { gasPrice: gasPrice.maxFeePerGas, nonce: nonce});
             console.log(`Sent Pong transaction with Pong txHash: ${tx.hash}`, `Ping txHash ${pingHash}`, `PingBlock: ${startBlock}`);
             updateLastState(blockNumber, nonce + 1);
             console.log(tx);
+            break;
         } catch (error) {
             if (error.code === 'ETIMEDOUT' || error.code === 'ECONNRESET' || error.message.includes('rate limit')) {
                 console.log(`Rate limited or network error, retrying... Attempt ${retries + 1}`);

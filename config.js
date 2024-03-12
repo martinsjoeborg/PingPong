@@ -1,4 +1,4 @@
-export const sepoliaContractAddress = "0x3314e1E2f92dB946194337876e49206a323d7E87";
+export const sepoliaContractAddress = "0xE06C425237b0998b1f387eEBA7017FD119DD7a04";
 
 export const CONTRACT_ABI = [
 	{
