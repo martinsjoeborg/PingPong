@@ -4,13 +4,9 @@ import fs from 'fs';
 import path from 'path';
 
 const sepoliaProvider = new ethers.InfuraWebSocketProvider("sepolia", "070c174a2442432a803e427d142d79c1");
-const walletPrivateKey = '2a32f63779c8684b17ea60d0d5979afef3741b8de323e96ac9596458f18bd26f';
+const walletPrivateKey = '42b9791c1a547ab667dab0659653595cf782dbbd2726626275527b8ddade20bd';
 const wallet = new ethers.Wallet(walletPrivateKey, sepoliaProvider);
-
 const sepoliaContract = new ethers.Contract(sepoliaContractAddress, CONTRACT_ABI, wallet);
-
-const nonce = await sepoliaProvider.getTransactionCount("0x5630Ab31526601e11d663cd623e202CaBB5B3f2f");
-console.log(nonce);
 
 let startBlock = readLastState().lastBlock;
 
@@ -53,7 +49,6 @@ async function startEventListener() {
                 return;
             }
         }
-
     }
     if (retries > maxRetries) {
         console.error(`Failed to initialize event listener after ${maxRetries} retries.`);
@@ -71,13 +66,11 @@ async function sendPong(pingHash, blockNumber) {
 
     while (retries <= maxRetries) {
         try {
-            const nonce = await sepoliaProvider.getTransactionCount("0x5630Ab31526601e11d663cd623e202CaBB5B3f2f");
-            // const newNonce = nonce + 1;
+            const nonce = await sepoliaProvider.getTransactionCount("0x55F191366Cde420332C486dd7D4B968F0ccaFAa1");
             const gasPrice = await sepoliaProvider.getFeeData();
             const tx = await sepoliaContract.pong(pingHash, { gasPrice: gasPrice.maxFeePerGas, nonce: nonce});
             console.log(`Sent Pong transaction with Pong txHash: ${tx.hash}`, `Ping txHash ${pingHash}`, `PingBlock: ${startBlock}`);
             updateLastState(blockNumber, nonce + 1);
-            console.log(tx);
             break;
         } catch (error) {
             if (error.code === 'ETIMEDOUT' || error.code === 'ECONNRESET' || error.message.includes('rate limit')) {
@@ -90,7 +83,6 @@ async function sendPong(pingHash, blockNumber) {
             }
         }
     }
-    console.log(startBlock);
 }
 
 async function exponentialBackoff(baseDelay, retries) {
